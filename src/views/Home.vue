@@ -24,6 +24,44 @@ export default {
     // HelloWorld,
     Navigator,
   },
+  //   mounted: function () {
+  //     // http://tt.linweiqin.com/api/tt/getArticles?lastid=0&&type="TT"&&page=1&&number=20
+  //     this.$axios
+  //       .get("http://tt.linweiqin.com/api/tt/getArticles", {
+  //         params: {
+  //           lastid: 0,
+  //           type: "TT",
+  //           page: 1,
+  //           number: 20,
+  //         },
+  //       })
+  //       .then((res) => {
+  //         console.log(res);
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+  //   },
+  // };
+  //改同步
+  async mounted() {
+    // http://tt.linweiqin.com/api/tt/getArticles?lastid=0&&type="TT"&&page=1&&number=20
+    let res = await this.$axios
+      .get("http://tt.linweiqin.com/api/tt/getArticles", {
+        params: {
+          lastid: 0,
+          type: "TT",
+          page: 1,
+          number: 20,
+        },
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  },
 };
 </script>
 <style lang='less' scoped>
