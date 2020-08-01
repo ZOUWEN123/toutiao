@@ -11,24 +11,16 @@
         <div class="content-middle-top">
           <section class="middle-top-tab">
             <section
-              v-for="item in tabs"
+              v-for="item,index in tabs"
               @click="handleTabChange(item.type)"
               :key="item.id"
               :class="['top-tab-item', { active: activeTab === item.type }]"
-            >
-              {{ item.text }}
-            </section>
+            >{{ item.text }}</section>
           </section>
         </div>
         <div class="content-middle-mid">
           <section v-show="activeTab == 'tt'">
-            <textarea
-              name=""
-              id=""
-              cols="30"
-              rows="10"
-              placeholder="写点什么吧"
-            ></textarea>
+            <textarea name id cols="30" rows="10" placeholder="写点什么吧"></textarea>
             <section class="mid-bottom">
               <section class="left">
                 <span class="title">图片</span>
@@ -38,7 +30,12 @@
           </section>
           <section class="article-content" v-show="activeTab == 'article'">
             <input class="article-input" v-model="title" type="text" />
-            <vue-editor id="editor" v-model="html_content"></vue-editor>
+            <vue-editor
+              id="editor"
+              v-model="html_content"
+              use-custom-image-handler
+              @image-added="handleImageAdded"
+            ></vue-editor>
             <section class="article-publish">
               <span class="publish-title" @click="publishArticle">发布</span>
             </section>
@@ -70,17 +67,41 @@ export default {
       //tab栏数据
       tabs: [
         { id: 1, text: "发微头条", type: "tt" },
-        { id: 1, text: "写文章", type: "article" },
+        { id: 2, text: "写文章", type: "article" },
       ],
       title: "", //标题
       html_content: "", //富文本编辑器内容
       //当前激活的tab
-      activeTab: "tt",
+      activeTab: "article",
     };
   },
   //方法集合
   methods: {
-    publishArticle: function() {
+    //添加图片上传的方式
+    handleImageAdded: function (f, Editor, cursorLocation, resetUploader) {
+      // An example of using FormData
+      // NOTE: Your key could be different such as:
+      // formData.append('file', file)
+
+      var formData = new FormData();
+      formData.append("file", f);
+
+      this.$axios({
+        url: "/aliossUpload",
+        method: "POST",
+        data: formData,
+      })
+        .then((result) => {
+          let url = result.url; // Get url from response
+          Editor.insertEmbed(cursorLocation, "image", url);
+          resetUploader();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    //文章发布
+    publishArticle: function () {
       let title = this.title;
       let html_content = this.html_content;
       if (!title || !html_content) {
@@ -104,7 +125,7 @@ export default {
         .catch((err) => console.log(err));
     },
     // auth_token KwiVWLCxXax3rRcVsmgX7shQGhtBtXnS
-    publishTT: function() {
+    publishTT: function () {
       let content = this.content;
       if (!content) {
         // 内容为空的情况下
@@ -129,7 +150,7 @@ export default {
         });
       this.content = "";
     },
-    handleTabChange: function(activeTab) {
+    handleTabChange: function (activeTab) {
       this.activeTab = activeTab;
     },
   },
